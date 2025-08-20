@@ -32,7 +32,7 @@ jobs:
       - run:
           name: "Run CPU test on small (1 CPU)"
           command: |
-            python - <<EOF
+            cat <<EOF | python
             import time
             start = time.time()
             def is_prime(n):
@@ -54,7 +54,7 @@ jobs:
       - run:
           name: "Run CPU test on medium (2 CPUs)"
           command: |
-            python - <<EOF
+            cat <<EOF | python
             import time, multiprocessing
             start = time.time()
             def is_prime(n):
@@ -65,8 +65,9 @@ jobs:
                 return True
             def worker(nums):
                 return [x for x in nums if is_prime(x)]
+            # Split workload into two chunks, process in parallel
+            chunks = [range(2,100000), range(100000,200000)]
             with multiprocessing.Pool(2) as pool:
-                chunks = [range(2,100000), range(100000,200000)]
                 results = pool.map(worker, chunks)
             primes = [p for sub in results for p in sub]
             print(f"Found {len(primes)} primes")
