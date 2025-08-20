@@ -1,0 +1,22 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/python:3.10
+    parallelism: 4   #  4 containers will run in parallel
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install -r requirements.txt
+      - run:
+          name: Run tests in parallel
+          command: |
+            circleci tests split --split-by=timings test-files.txt | xargs pytest -v
+
+workflows:
+  version: 2
+  test-workflow:
+    jobs:
+      - test
