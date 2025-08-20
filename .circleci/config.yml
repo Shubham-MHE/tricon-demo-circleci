@@ -26,27 +26,52 @@ version: 2.1
 jobs:
   run-small:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.11
     resource_class: small
     steps:
       - run:
-          name: "Run on small (1 CPU, 2GB RAM)"
+          name: "Run CPU test on small (1 CPU)"
           command: |
-            echo "Running on SMALL resource class"
-            sudo apt-get update && sudo apt-get install -y stress
-            stress --cpu 1 --timeout 10s
+            python - <<EOF
+            import time
+            start = time.time()
+            def is_prime(n):
+                if n < 2: return False
+                for i in range(2, int(n**0.5)+1):
+                    if n % i == 0:
+                        return False
+                return True
+            primes = [x for x in range(2, 200000) if is_prime(x)]
+            print(f"Found {len(primes)} primes")
+            print("Time taken:", round(time.time()-start, 2), "seconds")
+            EOF
 
   run-medium:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.11
     resource_class: medium
     steps:
       - run:
-          name: "Run on medium (2 CPUs, 4GB RAM)"
+          name: "Run CPU test on medium (2 CPUs)"
           command: |
-            echo "Running on MEDIUM resource class"
-            sudo apt-get update && sudo apt-get install -y stress
-            stress --cpu 2 --timeout 10s
+            python - <<EOF
+            import time, multiprocessing
+            start = time.time()
+            def is_prime(n):
+                if n < 2: return False
+                for i in range(2, int(n**0.5)+1):
+                    if n % i == 0:
+                        return False
+                return True
+            def worker(nums):
+                return [x for x in nums if is_prime(x)]
+            with multiprocessing.Pool(2) as pool:
+                chunks = [range(2,100000), range(100000,200000)]
+                results = pool.map(worker, chunks)
+            primes = [p for sub in results for p in sub]
+            print(f"Found {len(primes)} primes")
+            print("Time taken:", round(time.time()-start, 2), "seconds")
+            EOF
 
 workflows:
   demo:
