@@ -41,7 +41,7 @@ jobs:
                     if n % i == 0:
                         return False
                 return True
-            primes = [x for x in range(2, 200000) if is_prime(x)]
+            primes = [x for x in range(2, 800000) if is_prime(x)]
             print(f"Found {len(primes)} primes")
             print("Time taken:", round(time.time()-start, 2), "seconds")
             ' | python
@@ -65,7 +65,7 @@ jobs:
                 return True
             def worker(nums):
                 return [x for x in nums if is_prime(x)]
-            chunks = [range(2,100000), range(100000,200000)]
+            chunks = [range(2,400000), range(400000,800000)]
             with multiprocessing.Pool(2) as pool:
                 results = pool.map(worker, chunks)
             primes = [p for sub in results for p in sub]
